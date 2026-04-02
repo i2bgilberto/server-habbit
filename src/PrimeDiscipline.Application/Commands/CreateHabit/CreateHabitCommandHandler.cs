@@ -40,8 +40,14 @@ public sealed class CreateHabitCommandHandler(
         return Result.Success(ToDto(created));
     }
 
+    /// <summary>
+    /// Converts a Habit to HabitDto without today's computed status.
+    /// Used after create/update where today-status context is not available.
+    /// </summary>
     internal static HabitDto ToDto(Habit h) => new(
         h.Id, h.UserId, h.Name, h.Description, h.TargetTime, h.WindowMinutes, h.Type,
         new HabitFrequencyDto(h.Frequency.Type, h.Frequency.DaysOfWeek, h.Frequency.TimesPerPeriod),
-        h.IsActive, h.CreatedAtUtc);
+        h.IsActive, h.CreatedAtUtc,
+        TodayStatus: "PENDING",
+        TodayLog: null);
 }
