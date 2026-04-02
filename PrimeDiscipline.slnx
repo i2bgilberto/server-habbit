@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PrimeDiscipline.Application/PrimeDiscipline.Application.csproj" />
+    <Project Path="src/PrimeDiscipline.Domain/PrimeDiscipline.Domain.csproj" />
+    <Project Path="src/PrimeDiscipline.Infrastructure/PrimeDiscipline.Infrastructure.csproj" />
+    <Project Path="src/PrimeDiscipline.WebAPI/PrimeDiscipline.WebAPI.csproj" />
+  </Folder>
+</Solution>
