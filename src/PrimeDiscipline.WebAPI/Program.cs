@@ -57,7 +57,7 @@ int loginWindowS = builder.Configuration.GetValue<int>("RateLimit:LoginWindowSec
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddPolicy<string, HttpContext>("login", httpContext =>
+    options.AddPolicy("login", httpContext =>
     {
         string clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
