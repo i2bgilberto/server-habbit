@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using PrimeDiscipline.Application;
@@ -29,7 +30,12 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 // ── Controllers ──────────────────────────────────────────────────────────────
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+// Results.Ok / Results.Created (minimal API path) use a separate serializer
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(
+    o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 // ── CORS ─────────────────────────────────────────────────────────────────────
 string[] allowedOrigins = builder.Configuration

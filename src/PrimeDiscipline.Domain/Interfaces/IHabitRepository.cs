@@ -9,4 +9,5 @@ public interface IHabitRepository
     Task<IReadOnlyList<Habit>> GetAllActiveAsync(CancellationToken ct = default);
     Task<Habit> CreateAsync(Habit habit, CancellationToken ct = default);
     Task<bool> UpdateAsync(Habit habit, CancellationToken ct = default);
+    Task<bool> DeleteAsync(string id, CancellationToken ct = default);
 }

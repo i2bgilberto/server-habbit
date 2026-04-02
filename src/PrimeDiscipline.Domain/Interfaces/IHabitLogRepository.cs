@@ -22,9 +22,13 @@ public interface IHabitLogRepository
     Task<IReadOnlyList<HabitLog>> GetByHabitIdsAndDateRangeAsync(
         IEnumerable<string> habitIds, DateTime from, DateTime to, CancellationToken ct = default);
 
+    /// <summary>Returns all logs for a specific user on a given date.</summary>
+    Task<IReadOnlyList<HabitLog>> GetByUserIdAndDateAsync(string userId, DateTime date, CancellationToken ct = default);
+
     /// <summary>Returns all logs for a given day without a terminal status (used by the background worker).</summary>
     Task<IReadOnlyList<HabitLog>> GetPendingForDateAsync(DateTime date, CancellationToken ct = default);
 
     Task<HabitLog> CreateAsync(HabitLog log, CancellationToken ct = default);
     Task<bool> UpdateStatusAsync(string id, HabitLogStatus status, CancellationToken ct = default);
+    Task DeleteByHabitIdAsync(string habitId, CancellationToken ct = default);
 }

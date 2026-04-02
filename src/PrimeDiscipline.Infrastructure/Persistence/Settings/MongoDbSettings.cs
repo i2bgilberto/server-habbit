@@ -10,6 +10,7 @@ public sealed class MongoDbSettings
     // Collection names
     public string UsersCollection     { get; set; } = "users";
     public string HabitsCollection    { get; set; } = "habits";
-    public string HabitLogsCollection { get; set; } = "habitLogs";
-    public string SessionsCollection  { get; set; } = "sessions";
+    public string HabitLogsCollection  { get; set; } = "habitLogs";
+    public string SessionsCollection   { get; set; } = "sessions";
+    public string HabitMonthsCollection { get; set; } = "habitMonths";
 }

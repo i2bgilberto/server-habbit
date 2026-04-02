@@ -35,4 +35,10 @@ public sealed class HabitRepository(MongoDbContext context) : IHabitRepository
             h => h.Id == habit.Id, update, cancellationToken: ct);
         return result.ModifiedCount > 0;
     }
+
+    public async Task<bool> DeleteAsync(string id, CancellationToken ct = default)
+    {
+        DeleteResult result = await context.Habits.DeleteOneAsync(h => h.Id == id, ct);
+        return result.DeletedCount > 0;
+    }
 }

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PrimeDiscipline.Application.Commands.CreateHabit;
+using PrimeDiscipline.Application.Commands.DeleteHabit;
 using PrimeDiscipline.Application.Commands.UpdateHabit;
 using PrimeDiscipline.Application.DTOs;
 using PrimeDiscipline.Domain.Enums;
@@ -29,6 +30,23 @@ public sealed class HabitsController(IMediator mediator) : ControllerBase
             body.Type, body.FrequencyType, body.DaysOfWeek, body.TimesPerPeriod);
         Application.Common.Result<HabitDto> result = await mediator.Send(command, ct);
         return result.ToHttpResult(StatusCodes.Status201Created);
+    }
+
+    /// <summary>
+    /// Deletes a habit and all its associated logs and monthly bitmask records.
+    /// Only the owner can delete their own habit.
+    /// </summary>
+    [HttpDelete("{habitId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IResult> DeleteHabit([FromRoute] string habitId, CancellationToken ct)
+    {
+        string userId = HttpContext.GetSession().UserId;
+        Application.Common.Result<bool> result =
+            await mediator.Send(new DeleteHabitCommand(habitId, userId), ct);
+        return result.ToHttpResult(StatusCodes.Status204NoContent);
     }
 
     /// <summary>Updates an existing habit. UserId is taken from the session token.</summary>

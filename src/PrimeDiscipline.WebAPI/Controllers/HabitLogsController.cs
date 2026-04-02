@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PrimeDiscipline.Application.Commands.RecordActivity;
 using PrimeDiscipline.Application.DTOs;
 using PrimeDiscipline.Application.Queries.GetHabitLogs;
+using PrimeDiscipline.Application.Queries.GetTodayLogs;
 using PrimeDiscipline.WebAPI.Extensions;
 using PrimeDiscipline.WebAPI.Filters;
 
@@ -34,6 +35,18 @@ public sealed class HabitLogsController(IMediator mediator) : ControllerBase
         return result.ToHttpResult(StatusCodes.Status201Created);
     }
 
+    /// <summary>Returns all logs for the authenticated user for today (UTC). Used to hydrate habit status on load.</summary>
+    [HttpGet("today")]
+    [ProducesResponseType<IReadOnlyList<HabitLogDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IResult> GetTodayLogs(CancellationToken ct)
+    {
+        string userId = HttpContext.GetSession().UserId;
+        Application.Common.Result<IReadOnlyList<HabitLogDto>> result =
+            await mediator.Send(new GetTodayLogsQuery(userId), ct);
+        return result.ToHttpResult();
+    }
+
     /// <summary>Returns paginated log entries for a habit owned by the authenticated user.</summary>
     [HttpGet("{habitId}")]
     [ProducesResponseType<PagedResultDto<HabitLogDto>>(StatusCodes.Status200OK)]
@@ -53,4 +66,4 @@ public sealed class HabitLogsController(IMediator mediator) : ControllerBase
     }
 }
 
-public sealed record RecordActivityRequest(string HabitId, string Notes);
+public sealed record RecordActivityRequest(string HabitId, string? Notes);

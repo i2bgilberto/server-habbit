@@ -7,4 +7,4 @@ namespace PrimeDiscipline.Application.Commands.RecordActivity;
 public sealed record RecordActivityCommand(
     string HabitId,
     string UserId,
-    string Notes) : IRequest<Result<HabitLogDto>>;
+    string? Notes) : IRequest<Result<HabitLogDto>>;

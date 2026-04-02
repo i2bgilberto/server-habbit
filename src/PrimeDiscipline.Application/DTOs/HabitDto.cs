@@ -7,6 +7,14 @@ public sealed record HabitFrequencyDto(
     List<int>? DaysOfWeek,
     int? TimesPerPeriod);
 
+/// <summary>
+/// TodayStatus values:
+///   PENDING  — scheduled today, window still open, no log yet
+///   VIC      — logged today within the window
+///   DER      — logged today outside the window
+///   MISS     — scheduled today, window has closed, no log recorded
+///   OFF      — not scheduled today (e.g. rest day, wrong weekday)
+/// </summary>
 public sealed record HabitDto(
     string Id,
     string UserId,
@@ -17,4 +25,6 @@ public sealed record HabitDto(
     HabitType Type,
     HabitFrequencyDto Frequency,
     bool IsActive,
-    DateTime CreatedAtUtc);
+    DateTime CreatedAtUtc,
+    string TodayStatus,
+    HabitLogDto? TodayLog);

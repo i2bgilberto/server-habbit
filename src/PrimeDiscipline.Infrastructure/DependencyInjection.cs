@@ -2,7 +2,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PrimeDiscipline.Application.Interfaces;
 using PrimeDiscipline.Domain.Interfaces;
-using PrimeDiscipline.Infrastructure.BackgroundServices;
 using PrimeDiscipline.Infrastructure.Persistence;
 using PrimeDiscipline.Infrastructure.Persistence.Repositories;
 using PrimeDiscipline.Infrastructure.Persistence.Settings;
@@ -20,14 +19,13 @@ public static class DependencyInjection
 
         services.AddSingleton<MongoDbContext>();
 
-        services.AddScoped<IUserRepository,     UserRepository>();
-        services.AddScoped<IHabitRepository,    HabitRepository>();
-        services.AddScoped<IHabitLogRepository, HabitLogRepository>();
-        services.AddScoped<ISessionRepository,  SessionRepository>();
+        services.AddScoped<IUserRepository,      UserRepository>();
+        services.AddScoped<IHabitRepository,     HabitRepository>();
+        services.AddScoped<IHabitLogRepository,  HabitLogRepository>();
+        services.AddScoped<ISessionRepository,   SessionRepository>();
+        services.AddScoped<IHabitMonthRepository, HabitMonthRepository>();
 
         services.AddSingleton<IPasswordHasher, Argon2PasswordHasher>();
-
-        services.AddHostedService<HabitWindowWorker>();
 
         return services;
     }

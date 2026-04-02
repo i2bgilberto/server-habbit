@@ -72,6 +72,16 @@ public sealed class HabitLogRepository(MongoDbContext context) : IHabitLogReposi
         return await context.HabitLogs.Find(filter).ToListAsync(ct);
     }
 
+    public async Task<IReadOnlyList<HabitLog>> GetByUserIdAndDateAsync(
+        string userId, DateTime date, CancellationToken ct = default)
+    {
+        DateTime dateOnly = date.Date;
+        FilterDefinition<HabitLog> filter = Builders<HabitLog>.Filter.And(
+            Builders<HabitLog>.Filter.Eq(l => l.UserId, userId),
+            Builders<HabitLog>.Filter.Eq(l => l.Date, dateOnly));
+        return await context.HabitLogs.Find(filter).ToListAsync(ct);
+    }
+
     public async Task<IReadOnlyList<HabitLog>> GetPendingForDateAsync(DateTime date, CancellationToken ct = default) =>
         await context.HabitLogs
             .Find(l => l.Date == date.Date && l.Status != HabitLogStatus.VIC)
@@ -99,4 +109,7 @@ public sealed class HabitLogRepository(MongoDbContext context) : IHabitLogReposi
             cancellationToken: ct);
         return result.ModifiedCount > 0;
     }
+
+    public async Task DeleteByHabitIdAsync(string habitId, CancellationToken ct = default) =>
+        await context.HabitLogs.DeleteManyAsync(l => l.HabitId == habitId, ct);
 }

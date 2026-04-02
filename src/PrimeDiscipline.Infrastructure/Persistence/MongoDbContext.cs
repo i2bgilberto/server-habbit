@@ -21,10 +21,11 @@ public sealed class MongoDbContext
         _database = client.GetDatabase(_settings.DatabaseName);
     }
 
-    public IMongoCollection<User>     Users     => _database.GetCollection<User>(_settings.UsersCollection);
-    public IMongoCollection<Habit>    Habits    => _database.GetCollection<Habit>(_settings.HabitsCollection);
-    public IMongoCollection<HabitLog> HabitLogs => _database.GetCollection<HabitLog>(_settings.HabitLogsCollection);
-    public IMongoCollection<Session>  Sessions  => _database.GetCollection<Session>(_settings.SessionsCollection);
+    public IMongoCollection<User>       Users       => _database.GetCollection<User>(_settings.UsersCollection);
+    public IMongoCollection<Habit>      Habits      => _database.GetCollection<Habit>(_settings.HabitsCollection);
+    public IMongoCollection<HabitLog>   HabitLogs   => _database.GetCollection<HabitLog>(_settings.HabitLogsCollection);
+    public IMongoCollection<Session>    Sessions    => _database.GetCollection<Session>(_settings.SessionsCollection);
+    public IMongoCollection<HabitMonth> HabitMonths => _database.GetCollection<HabitMonth>(_settings.HabitMonthsCollection);
 
     public async Task EnsureIndexesAsync(CancellationToken ct = default)
     {
@@ -32,6 +33,7 @@ public sealed class MongoDbContext
         await EnsureHabitIndexesAsync(ct);
         await EnsureHabitLogIndexesAsync(ct);
         await EnsureSessionIndexesAsync(ct);
+        await EnsureHabitMonthIndexesAsync(ct);
         _logger.LogInformation("MongoDB indexes verified.");
     }
 
@@ -80,6 +82,29 @@ public sealed class MongoDbContext
         IndexKeysDefinition<HabitLog> userIdKey = Builders<HabitLog>.IndexKeys.Ascending(l => l.UserId);
         CreateIndexModel<HabitLog> userIdIndex   = new(userIdKey, new CreateIndexOptions { Name = "idx_habitLogs_userId" });
         await HabitLogs.Indexes.CreateOneAsync(userIdIndex, cancellationToken: ct);
+    }
+
+    private async Task EnsureHabitMonthIndexesAsync(CancellationToken ct)
+    {
+        // Unique per habit per month — the core invariant
+        IndexKeysDefinition<HabitMonth> compoundKey = Builders<HabitMonth>.IndexKeys
+            .Ascending(m => m.HabitId)
+            .Ascending(m => m.Year)
+            .Ascending(m => m.Month);
+        await HabitMonths.Indexes.CreateOneAsync(
+            new CreateIndexModel<HabitMonth>(compoundKey,
+                new CreateIndexOptions { Unique = true, Name = "idx_habitMonths_habitId_year_month" }),
+            cancellationToken: ct);
+
+        // Fast lookup of all months for a user in a given period
+        IndexKeysDefinition<HabitMonth> userPeriodKey = Builders<HabitMonth>.IndexKeys
+            .Ascending(m => m.UserId)
+            .Ascending(m => m.Year)
+            .Ascending(m => m.Month);
+        await HabitMonths.Indexes.CreateOneAsync(
+            new CreateIndexModel<HabitMonth>(userPeriodKey,
+                new CreateIndexOptions { Name = "idx_habitMonths_userId_year_month" }),
+            cancellationToken: ct);
     }
 
     private async Task EnsureSessionIndexesAsync(CancellationToken ct)
