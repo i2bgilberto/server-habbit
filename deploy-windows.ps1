@@ -6,7 +6,8 @@ param(
     [string]$ServiceName     = "PrimeDiscipline",
     [string]$DisplayName     = "Prime Discipline API",
     [string]$InstallPath     = "C:\Services\PrimeDiscipline",
-    [string]$MongoUri        = $env:MONGODB_URI
+    [string]$MongoUri        = $env:MONGODB_URI,
+    [string]$AspNetCoreUrls  = "http://127.0.0.1:5254"
 )
 
 $ErrorActionPreference = "Stop"
@@ -48,6 +49,7 @@ New-Service `
 Write-Host "=== 3. Configurando variable de entorno del sistema ===" -ForegroundColor Cyan
 [System.Environment]::SetEnvironmentVariable("MONGODB_URI", $MongoUri, "Machine")
 [System.Environment]::SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Production", "Machine")
+[System.Environment]::SetEnvironmentVariable("ASPNETCORE_URLS", $AspNetCoreUrls, "Machine")
 
 Write-Host "=== 4. Iniciando servicio ===" -ForegroundColor Cyan
 Start-Service -Name $ServiceName
@@ -60,4 +62,5 @@ Write-Host ""
 Write-Host "Deploy completado." -ForegroundColor Green
 Write-Host "  Servicio : $ServiceName"
 Write-Host "  Ruta     : $InstallPath"
-Write-Host "  Health   : http://localhost:5254/healthz"
+Write-Host "  Url      : $AspNetCoreUrls"
+Write-Host "  Health   : $AspNetCoreUrls/healthz"

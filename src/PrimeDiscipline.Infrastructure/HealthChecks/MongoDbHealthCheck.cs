@@ -10,9 +10,9 @@ public sealed class MongoDbHealthCheck(MongoDbContext context) : IHealthCheck
     {
         try
         {
-            long count = await context.Users.CountDocumentsAsync(
+            await context.Users.CountDocumentsAsync(
                 MongoDB.Driver.Builders<PrimeDiscipline.Domain.Entities.User>.Filter.Empty, cancellationToken: ct);
-            return HealthCheckResult.Healthy($"MongoDB reachable. Users collection has {count} documents.");
+            return HealthCheckResult.Healthy("MongoDB reachable.");
         }
         catch (Exception ex)
         {
