@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Net;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -56,13 +57,21 @@ int loginWindowS = builder.Configuration.GetValue<int>("RateLimit:LoginWindowSec
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter("login", cfg =>
+    options.AddPolicy<string, HttpContext>("login", httpContext =>
     {
-        cfg.PermitLimit         = loginPermit;
-        cfg.Window              = TimeSpan.FromSeconds(loginWindowS);
-        cfg.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        cfg.QueueLimit          = 0;
+        string clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: clientIp,
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = loginPermit,
+                Window = TimeSpan.FromSeconds(loginWindowS),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0,
+            });
     });
+
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.OnRejected = async (ctx, _) =>
     {
@@ -110,6 +119,8 @@ ForwardedHeadersOptions forwardedHeadersOptions = new()
 
 forwardedHeadersOptions.KnownNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
+forwardedHeadersOptions.KnownProxies.Add(IPAddress.Loopback);
+forwardedHeadersOptions.KnownProxies.Add(IPAddress.IPv6Loopback);
 
 app.UseForwardedHeaders(forwardedHeadersOptions);
 app.UseMiddleware<SecurityHeadersMiddleware>();
@@ -135,6 +146,15 @@ else
 
 app.UseHttpsRedirection();
 app.MapControllers();
-app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/healthz", new()
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "text/plain";
+        await context.Response.WriteAsync(report.Status == Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Healthy
+            ? "Healthy"
+            : "Unhealthy");
+    }
+});
 
 app.Run();

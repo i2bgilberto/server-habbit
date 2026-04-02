@@ -1,4 +1,5 @@
 using MongoDB.Driver;
+using PrimeDiscipline.Application.Common;
 using PrimeDiscipline.Domain.Entities;
 using PrimeDiscipline.Domain.Interfaces;
 
@@ -14,13 +15,15 @@ public sealed class SessionRepository(MongoDbContext context) : ISessionReposito
 
     public async Task<Session?> GetByTokenAsync(string token, CancellationToken ct = default) =>
         await context.Sessions
-            .Find(s => s.Token == token && !s.IsRevoked && s.ExpiresAtUtc > DateTime.UtcNow)
+            .Find(s => (s.Token == SessionToken.HashToken(token) || s.Token == token) &&
+                       !s.IsRevoked &&
+                       s.ExpiresAtUtc > DateTime.UtcNow)
             .FirstOrDefaultAsync(ct);
 
     public async Task<bool> RevokeAsync(string token, CancellationToken ct = default)
     {
         UpdateResult result = await context.Sessions.UpdateOneAsync(
-            s => s.Token == token,
+            s => s.Token == SessionToken.HashToken(token) || s.Token == token,
             Builders<Session>.Update.Set(s => s.IsRevoked, true),
             cancellationToken: ct);
         return result.ModifiedCount > 0;

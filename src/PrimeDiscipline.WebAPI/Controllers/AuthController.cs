@@ -45,7 +45,7 @@ public sealed class AuthController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IResult> Logout(CancellationToken ct)
     {
-        string token = HttpContext.GetSession().Token;
+        string token = HttpContext.GetSessionToken();
         Application.Common.Result<bool> result = await mediator.Send(new LogoutCommand(token), ct);
         return result.ToHttpResult();
     }

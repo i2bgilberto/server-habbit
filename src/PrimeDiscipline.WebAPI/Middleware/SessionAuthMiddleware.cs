@@ -11,6 +11,7 @@ namespace PrimeDiscipline.WebAPI.Middleware;
 public sealed class SessionAuthMiddleware(RequestDelegate next)
 {
     public const string SessionKey = "CurrentSession";
+    public const string RawTokenKey = "CurrentSessionToken";
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -22,7 +23,10 @@ public sealed class SessionAuthMiddleware(RequestDelegate next)
             Session? session        = await repo.GetByTokenAsync(token);
 
             if (session is not null)
+            {
                 context.Items[SessionKey] = session;
+                context.Items[RawTokenKey] = token;
+            }
         }
 
         await next(context);

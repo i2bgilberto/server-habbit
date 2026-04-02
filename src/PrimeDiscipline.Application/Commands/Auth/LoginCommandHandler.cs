@@ -27,10 +27,12 @@ public sealed class LoginCommandHandler(
         if (!user.IsActive)
             return Result.Failure<SessionDto>(Error.Forbidden("Account is disabled."));
 
+        string rawToken = SessionToken.GenerateRawToken();
+
         Session session = new()
         {
             UserId       = user.Id,
-            Token        = Guid.NewGuid().ToString("N"),
+            Token        = SessionToken.HashToken(rawToken),
             CreatedAtUtc = DateTime.UtcNow,
             ExpiresAtUtc = DateTime.UtcNow.Add(SessionDuration),
         };
@@ -41,7 +43,7 @@ public sealed class LoginCommandHandler(
             user.Id,
             user.DisplayName,
             user.Email,
-            session.Token,
+            rawToken,
             session.ExpiresAtUtc));
     }
 }
