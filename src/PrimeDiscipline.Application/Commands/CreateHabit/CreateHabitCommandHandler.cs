@@ -43,5 +43,5 @@ public sealed class CreateHabitCommandHandler(
     internal static HabitDto ToDto(Habit h) => new(
         h.Id, h.UserId, h.Name, h.Description, h.TargetTime, h.WindowMinutes, h.Type,
         new HabitFrequencyDto(h.Frequency.Type, h.Frequency.DaysOfWeek, h.Frequency.TimesPerPeriod),
-        h.IsActive, h.CreatedAtUtc);
+        h.IsActive, h.CreatedAtUtc, "PENDING", null);
 }
