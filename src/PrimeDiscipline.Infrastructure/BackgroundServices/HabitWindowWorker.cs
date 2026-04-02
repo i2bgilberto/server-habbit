@@ -141,11 +141,17 @@ public sealed class HabitWindowWorker(
     }
 
     /// <summary>
-    /// Returns true if the habit requires a log on the given date based on its frequency.
+    /// Returns true if the worker should auto-close this habit on the given date.
+    /// The creation day is always excluded — tracking starts the day after creation.
     /// TimesPerWeek and TimesPerMonth are scheduled every day — the quota is a progress metric only.
     /// </summary>
-    private static bool IsScheduledForDate(Habit habit, DateTime date) =>
-        habit.Frequency.Type switch
+    private static bool IsScheduledForDate(Habit habit, DateTime date)
+    {
+        // Creation day: user may log manually but the worker never auto-closes it
+        if (date.Date == habit.CreatedAtUtc.Date)
+            return false;
+
+        return habit.Frequency.Type switch
         {
             FrequencyType.Daily         => true,
             FrequencyType.TimesPerWeek  => true,
@@ -156,4 +162,5 @@ public sealed class HabitWindowWorker(
             FrequencyType.EveryOtherDay => (int)(date.Date - habit.CreatedAtUtc.Date).TotalDays % 2 == 0,
             _                           => true,
         };
+    }
 }
