@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 using PrimeDiscipline.Application;
 using PrimeDiscipline.Infrastructure;
 using PrimeDiscipline.Infrastructure.HealthChecks;
@@ -102,6 +103,15 @@ using (IServiceScope scope = app.Services.CreateScope())
     await context.EnsureIndexesAsync();
 }
 
+ForwardedHeadersOptions forwardedHeadersOptions = new()
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+
+forwardedHeadersOptions.KnownNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+
+app.UseForwardedHeaders(forwardedHeadersOptions);
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseCors("Frontend");
