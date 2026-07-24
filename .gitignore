@@ -19,6 +19,13 @@ appsettings.*.local.json
 # Claude internal
 .claude/
 
+# Logs
+*.log
+
+# Local tooling
+.codex-dotnet-home/
+dotnet-install.ps1
+
 # OS
 Thumbs.db
 .DS_Store
